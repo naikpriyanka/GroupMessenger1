@@ -9,30 +9,31 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.TextView;
 
+import static edu.buffalo.cse.cse486586.groupmessenger1.data.GroupMessengerContract.CONTENT_AUTHORITY;
+import static edu.buffalo.cse.cse486586.groupmessenger1.data.GroupMessengerContract.GroupMessengerEntry.KEY_FIELD;
+import static edu.buffalo.cse.cse486586.groupmessenger1.data.GroupMessengerContract.GroupMessengerEntry.VALUE_FIELD;
+
 /**
- * OnPTestClickListener demonstrates how to access a ContentProvider. First, please read 
- * 
+ * OnPTestClickListener demonstrates how to access a ContentProvider. First, please read
+ * <p>
  * http://developer.android.com/guide/topics/providers/content-providers.html
  * http://developer.android.com/reference/android/content/ContentProvider.html
- * 
+ * <p>
  * before you start. Please note that our use of a ContentProvider is a bit different from the
  * standard way of using it as described in the PA2 spec. The bottom line is that our
  * ContentProvider does not have full support for SQL. It is just a key-value table, like a hash
  * table. It just needs to be able to insert (key, value) pairs, store them, and return them when
  * queried.
- * 
+ * <p>
  * A ContentProvider has a unique URI that other apps use to access it. ContentResolver is
  * the class to use when accessing a ContentProvider.
- * 
- * @author stevko
  *
+ * @author stevko
  */
 public class OnPTestClickListener implements OnClickListener {
 
     private static final String TAG = OnPTestClickListener.class.getName();
     private static final int TEST_CNT = 50;
-    private static final String KEY_FIELD = "key";
-    private static final String VALUE_FIELD = "value";
 
     private final TextView mTextView;
     private final ContentResolver mContentResolver;
@@ -42,13 +43,13 @@ public class OnPTestClickListener implements OnClickListener {
     public OnPTestClickListener(TextView _tv, ContentResolver _cr) {
         mTextView = _tv;
         mContentResolver = _cr;
-        mUri = buildUri("content", "edu.buffalo.cse.cse486586.groupmessenger1.provider");
+        mUri = buildUri("content", CONTENT_AUTHORITY);
         mContentValues = initTestValues();
     }
 
     /**
      * buildUri() demonstrates how to build a URI for a ContentProvider.
-     * 
+     *
      * @param scheme
      * @param authority
      * @return the URI
@@ -89,7 +90,7 @@ public class OnPTestClickListener implements OnClickListener {
 
     /**
      * testInsert() uses ContentResolver.insert() to insert values into your ContentProvider.
-     * 
+     *
      * @return true if the insertions were successful. Otherwise, false.
      */
     private boolean testInsert() {
@@ -109,12 +110,12 @@ public class OnPTestClickListener implements OnClickListener {
      * testQuery() uses ContentResolver.query() to retrieves values from your ContentProvider.
      * It simply queries one key at a time and verifies whether it matches any (key, value) pair
      * previously inserted by testInsert().
-     * 
+     * <p>
      * Please pay extra attention to the Cursor object you return from your ContentProvider.
-     * It should have two columns; the first column (KEY_FIELD) is for keys 
+     * It should have two columns; the first column (KEY_FIELD) is for keys
      * and the second column (VALUE_FIELD) is values. In addition, it should include exactly
      * one row that contains a key and a value.
-     * 
+     *
      * @return
      */
     private boolean testQuery() {
@@ -123,7 +124,7 @@ public class OnPTestClickListener implements OnClickListener {
                 String key = (String) mContentValues[i].get(KEY_FIELD);
                 String val = (String) mContentValues[i].get(VALUE_FIELD);
 
-                Cursor resultCursor = mContentResolver.query(mUri, null, key, null, null);
+                Cursor resultCursor = mContentResolver.query(mUri, null, KEY_FIELD + "=?", new String[]{key}, null);
                 if (resultCursor == null) {
                     Log.e(TAG, "Result null");
                     throw new Exception();

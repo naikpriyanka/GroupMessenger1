@@ -1,30 +1,41 @@
 package edu.buffalo.cse.cse486586.groupmessenger1;
 
 import android.content.ContentProvider;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.util.Log;
+
+import edu.buffalo.cse.cse486586.groupmessenger1.data.GroupMessengerDbHelper;
+
+import static edu.buffalo.cse.cse486586.groupmessenger1.data.GroupMessengerContract.GroupMessengerEntry.KEY_FIELD;
+import static edu.buffalo.cse.cse486586.groupmessenger1.data.GroupMessengerContract.GroupMessengerEntry.TABLE_NAME;
+import static edu.buffalo.cse.cse486586.groupmessenger1.data.GroupMessengerContract.GroupMessengerEntry.VALUE_FIELD;
 
 /**
  * GroupMessengerProvider is a key-value table. Once again, please note that we do not implement
  * full support for SQL as a usual ContentProvider does. We re-purpose ContentProvider's interface
  * to use it as a key-value table.
- * 
+ * <p>
  * Please read:
- * 
+ * <p>
  * http://developer.android.com/guide/topics/providers/content-providers.html
  * http://developer.android.com/reference/android/content/ContentProvider.html
- * 
+ * <p>
  * before you start to get yourself familiarized with ContentProvider.
- * 
+ * <p>
  * There are two methods you need to implement---insert() and query(). Others are optional and
  * will not be tested.
- * 
- * @author stevko
  *
+ * @author stevko
  */
 public class GroupMessengerProvider extends ContentProvider {
+
+    public static final String LOG_TAG = GroupMessengerProvider.class.getSimpleName();
+
+    private GroupMessengerDbHelper mDbHelper;
 
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
@@ -41,7 +52,7 @@ public class GroupMessengerProvider extends ContentProvider {
     @Override
     public Uri insert(Uri uri, ContentValues values) {
         /*
-         * TODO: You need to implement this method. Note that values will have two columns (a key
+         * COMPLETED: You need to implement this method. Note that values will have two columns (a key
          * column and a value column) and one row that contains the actual (key, value) pair to be
          * inserted.
          * 
@@ -50,14 +61,29 @@ public class GroupMessengerProvider extends ContentProvider {
          * internal storage option that we used in PA1. If you want to use that option, please
          * take a look at the code for PA1.
          */
-        Log.v("insert", values.toString());
-        return uri;
+        String key = values.getAsString(KEY_FIELD);
+        if (key == null) {
+            throw new IllegalArgumentException("Message requires a key");
+        }
+        String value = values.getAsString(VALUE_FIELD);
+        if (value == null) {
+            throw new IllegalArgumentException("Message requires a value");
+        }
+        SQLiteDatabase database = mDbHelper.getWritableDatabase();
+        long id = database.insertWithOnConflict(TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_REPLACE);
+        if (id == -1) {
+            Log.e(LOG_TAG, "Failed to insert row for " + uri);
+            return null;
+        }
+        getContext().getContentResolver().notifyChange(uri, null);
+        return ContentUris.withAppendedId(uri, id);
     }
 
     @Override
     public boolean onCreate() {
         // If you need to perform any one-time initialization task, please do it here.
-        return false;
+        mDbHelper = new GroupMessengerDbHelper(getContext());
+        return true;
     }
 
     @Override
@@ -70,7 +96,7 @@ public class GroupMessengerProvider extends ContentProvider {
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
                         String sortOrder) {
         /*
-         * TODO: You need to implement this method. Note that you need to return a Cursor object
+         * COMPLETED: You need to implement this method. Note that you need to return a Cursor object
          * with the right format. If the formatting is not correct, then it is not going to work.
          *
          * If you use SQLite, whatever is returned from SQLite is a Cursor object. However, you
@@ -80,7 +106,12 @@ public class GroupMessengerProvider extends ContentProvider {
          * recommend building a MatrixCursor described at:
          * http://developer.android.com/reference/android/database/MatrixCursor.html
          */
-        Log.v("query", selection);
-        return null;
+        SQLiteDatabase database = mDbHelper.getReadableDatabase();
+        selectionArgs = new String[]{selection};
+        selection = KEY_FIELD + "=?";
+        Cursor cursor = database.query(TABLE_NAME, projection, selection, selectionArgs, null, null, sortOrder);
+        cursor.setNotificationUri(getContext().getContentResolver(), uri);
+        Log.v("query", selectionArgs[0]);
+        return cursor;
     }
 }

@@ -8,9 +8,8 @@ import android.widget.TextView;
 
 /**
  * GroupMessengerActivity is the main Activity for the assignment.
- * 
- * @author stevko
  *
+ * @author stevko
  */
 public class GroupMessengerActivity extends Activity {
 
