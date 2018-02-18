@@ -60,11 +60,9 @@ public class GroupMessengerActivity extends Activity {
         TelephonyManager tel = (TelephonyManager) this.getSystemService(Context.TELEPHONY_SERVICE);
         String portStr = tel.getLine1Number().substring(tel.getLine1Number().length() - 4);
         final String myPort = String.valueOf((Integer.parseInt(portStr) * 2));
-        System.out.println("MyPort" + myPort);
 
         try {
             ServerSocket serverSocket = new ServerSocket(SERVER_PORT);
-            serverSocket.setReuseAddress(true);
             new ServerTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, serverSocket);
             System.out.println("Server Socket Created");
         } catch (IOException e) {
@@ -117,16 +115,13 @@ public class GroupMessengerActivity extends Activity {
 
         @Override
         protected Void doInBackground(ServerSocket... sockets) {
-            System.out.println("In server socket background");
             ServerSocket serverSocket = sockets[0];
             while (true) {
                 try {
                     if (serverSocket != null) {
-                        System.out.println("In server accept");
                         Socket socket = serverSocket.accept();
                         DataInputStream in = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
                         String msgReceived = in.readUTF();
-                        System.out.println("Message Received" + msgReceived);
                         values.put(KEY_FIELD, count);
                         values.put(VALUE_FIELD, msgReceived);
                         getContentResolver().insert(BASE_CONTENT_URI, values);
@@ -148,12 +143,9 @@ public class GroupMessengerActivity extends Activity {
         protected Void doInBackground(String... msgs) {
             for (int i = 0; i < clientPorts.size(); i++) {
                 try {
-                    System.out.println("Iterator " + i);
                     String remotePort = clientPorts.get(i);
-                    System.out.println("Remote port" + remotePort);
                     Socket socket = new Socket(InetAddress.getByAddress(new byte[]{10, 0, 2, 2}), Integer.parseInt(remotePort));
                     String msgToSend = msgs[0];
-                    System.out.println("Message to send" + msgToSend);
                     DataOutputStream out = new DataOutputStream(socket.getOutputStream());
                     out.writeUTF(msgToSend);
                     out.flush();
