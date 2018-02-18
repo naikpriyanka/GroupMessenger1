@@ -64,7 +64,6 @@ public class GroupMessengerActivity extends Activity {
         try {
             ServerSocket serverSocket = new ServerSocket(SERVER_PORT);
             new ServerTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, serverSocket);
-            System.out.println("Server Socket Created");
         } catch (IOException e) {
             Log.e(TAG, "Can't create a ServerSocket");
             return;
@@ -76,13 +75,12 @@ public class GroupMessengerActivity extends Activity {
          */
         final TextView tv = (TextView) findViewById(R.id.textView1);
         tv.setMovementMethod(new ScrollingMovementMethod());
-        
+
         /*
          * Registers OnPTestClickListener for "button1" in the layout, which is the "PTest" button.
          * OnPTestClickListener demonstrates how to access a ContentProvider.
          */
-        findViewById(R.id.button1).setOnClickListener(
-                new OnPTestClickListener(tv, getContentResolver()));
+        findViewById(R.id.button1).setOnClickListener(new OnPTestClickListener(tv, getContentResolver()));
         
         /*
          * COMPLETED: You need to register and implement an OnClickListener for the "Send" button.
@@ -111,8 +109,6 @@ public class GroupMessengerActivity extends Activity {
 
     private class ServerTask extends AsyncTask<ServerSocket, String, Void> {
 
-        ContentValues values = new ContentValues();
-
         @Override
         protected Void doInBackground(ServerSocket... sockets) {
             ServerSocket serverSocket = sockets[0];
@@ -122,6 +118,7 @@ public class GroupMessengerActivity extends Activity {
                         Socket socket = serverSocket.accept();
                         DataInputStream in = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
                         String msgReceived = in.readUTF();
+                        ContentValues values = new ContentValues();
                         values.put(KEY_FIELD, count);
                         values.put(VALUE_FIELD, msgReceived);
                         getContentResolver().insert(BASE_CONTENT_URI, values);
