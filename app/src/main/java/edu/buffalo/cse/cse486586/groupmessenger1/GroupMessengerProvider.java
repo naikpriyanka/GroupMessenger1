@@ -10,6 +10,7 @@ import android.util.Log;
 
 import edu.buffalo.cse.cse486586.groupmessenger1.data.GroupMessengerDbHelper;
 
+import static edu.buffalo.cse.cse486586.groupmessenger1.GroupMessengerActivity.TAG;
 import static edu.buffalo.cse.cse486586.groupmessenger1.data.GroupMessengerContract.GroupMessengerEntry.KEY_FIELD;
 import static edu.buffalo.cse.cse486586.groupmessenger1.data.GroupMessengerContract.GroupMessengerEntry.TABLE_NAME;
 import static edu.buffalo.cse.cse486586.groupmessenger1.data.GroupMessengerContract.GroupMessengerEntry.VALUE_FIELD;
@@ -109,9 +110,25 @@ public class GroupMessengerProvider extends ContentProvider {
         SQLiteDatabase database = mDbHelper.getReadableDatabase();
         selectionArgs = new String[]{selection};
         selection = KEY_FIELD + "=?";
-        Cursor cursor = database.query(TABLE_NAME, projection, selection, selectionArgs, null, null, sortOrder);
-        cursor.setNotificationUri(getContext().getContentResolver(), uri);
+        Cursor resultCursor = database.query(TABLE_NAME, projection, selection, selectionArgs, null, null, sortOrder);
+        if (resultCursor == null) {
+            Log.e(TAG, "Result null");
+        }
+
+        int keyIndex = resultCursor.getColumnIndex(KEY_FIELD);
+        int valueIndex = resultCursor.getColumnIndex(VALUE_FIELD);
+        if (keyIndex == -1 || valueIndex == -1) {
+            Log.e(TAG, "Wrong columns");
+        }
+
+        resultCursor.moveToFirst();
+
+        if (!(resultCursor.isFirst() && resultCursor.isLast())) {
+            Log.e(TAG, "Wrong number of rows");
+        }
+
+        resultCursor.setNotificationUri(getContext().getContentResolver(), uri);
         Log.v("query", selectionArgs[0]);
-        return cursor;
+        return resultCursor;
     }
 }

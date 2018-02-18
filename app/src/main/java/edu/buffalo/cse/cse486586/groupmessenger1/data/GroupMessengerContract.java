@@ -1,5 +1,6 @@
 package edu.buffalo.cse.cse486586.groupmessenger1.data;
 
+import android.net.Uri;
 import android.provider.BaseColumns;
 
 /**
@@ -9,6 +10,8 @@ import android.provider.BaseColumns;
 public final class GroupMessengerContract {
 
     public static final String CONTENT_AUTHORITY = "edu.buffalo.cse.cse486586.groupmessenger1.provider";
+
+    public static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
 
     public static final class GroupMessengerEntry implements BaseColumns {
 
