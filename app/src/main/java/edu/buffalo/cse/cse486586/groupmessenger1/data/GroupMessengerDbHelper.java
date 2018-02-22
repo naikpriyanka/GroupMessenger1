@@ -14,10 +14,21 @@ import static edu.buffalo.cse.cse486586.groupmessenger1.data.GroupMessengerContr
 
 public class GroupMessengerDbHelper extends SQLiteOpenHelper {
 
+    /*
+     * Name of the database file
+     */
     private static final String DATABASE_NAME = "messages.db";
 
+    /**
+     * Database version. If you change the database schema, you must increment the database version.
+     */
     private static final int DATABASE_VERSION = 5;
 
+    /**
+     * Constructs a new instance of {@link GroupMessengerDbHelper}.
+     *
+     * @param context of the app
+     */
     public GroupMessengerDbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
